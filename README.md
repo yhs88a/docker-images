@@ -1,2 +1,2 @@
 # docker-images
-automated Docker image builds and updates.
+Automated Docker image builds and updates.

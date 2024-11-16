@@ -13,7 +13,7 @@ FROM base AS build
 # renovate: datasource=github-releases depName=hashicorp/terraform
 ARG IMAGE_VERSION=1.9.8
 # renovate: datasource=github-releases depName=gruntwork-io/terragrunt
-ARG TERRAGRUNT_VERSION=0.68.7
+ARG TERRAGRUNT_VERSION=0.68.14
 # renovate: datasource=github-releases depName=terraform-docs/terraform-docs
 ARG TERRAFORMDOCS_VERSION=0.19.0
 

@@ -1,0 +1,57 @@
+---
+name: 'build terraform'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+  workflow_dispatch:
+
+env:
+  DOCKER_USER: ${{ secrets.DOCKER_USER }}
+  DOCKER_SECRET: ${{ secrets.DOCKER_SECRET }}
+  OWNER: ${{ github.repository_owner }}
+  GROUP: ci
+  FILE: terraform
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout
+        with:
+          show-progress: false
+
+      - name: 'set up qemu'
+        uses: docker/setup-qemu-action
+
+      - name: 'set up docker buildx'
+        uses: docker/setup-buildx-action
+
+      - name: 'login to dockerhub'
+        uses: docker/login-action
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ env.DOCKER_SECRET }}
+
+      - name: 'extract version from dockerfile'
+        id: extract_version
+        run: |
+          BASE_VERSION=$(sed -n 's/^ARG BASE_VERSION=v\?\([0-9.]*\).*/\1/p' ./${{ env.FILE }}/Dockerfile)
+          echo "BASE_VERSION=${BASE_VERSION#v}" >> $GITHUB_ENV
+          echo "BASE_VERSION=${BASE_VERSION#v}"
+          TAG=$(sed -n 's/^ARG IMAGE_VERSION=v\?\([0-9.]*\).*/\1/p' ./${{ env.FILE }}/Dockerfile)
+          echo "TAG=${TAG#v}" >> $GITHUB_ENV
+          echo "TAG=${TAG#v}"
+
+      - name: 'push'
+        uses: docker/bake-action
+        with:
+          targets: push
+          workdir: ./${{ env.FILE }}

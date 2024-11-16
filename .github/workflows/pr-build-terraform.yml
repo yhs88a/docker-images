@@ -1,0 +1,41 @@
+---
+name: 'pr-build terraform'
+
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+env:
+  GROUP: ci
+  FILE: terraform
+
+permissions:
+  contents: read
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout
+        with:
+          show-progress: false
+
+      - name: 'set up qemu'
+        uses: docker/setup-qemu-action
+
+      - name: 'set up docker buildx'
+        uses: docker/setup-buildx-action
+
+      - name: 'test'
+        uses: docker/bake-action
+        with:
+          targets: test
+          workdir: ./${{ env.FILE }}
